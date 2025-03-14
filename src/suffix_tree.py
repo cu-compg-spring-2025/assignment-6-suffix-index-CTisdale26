@@ -22,7 +22,6 @@ def get_args():
 
     return parser.parse_args()
 
-
 def add_suffix(nodes, suf):
     n = 0
     i = 0
@@ -63,9 +62,40 @@ def build_suffix_tree(text):
     return nodes
 
 def search_tree(suffix_tree, P):
-    # Your code here
-    return None
-
+    n = 0
+    i = 0
+    matches = []
+    
+    # Navigate to the node representing the end of the pattern
+    while i < len(P):
+        b = P[i]
+        children = suffix_tree[n][CHILDREN]
+        if b not in children:
+            return 0, []  # Pattern not found
+        n2 = children[b]
+        sub2 = suffix_tree[n2][SUB]
+        j = 0
+        while j < len(sub2) and i + j < len(P) and P[i + j] == sub2[j]:
+            j += 1
+        if j < len(sub2):
+            return 0, []  # Pattern not found
+        i += j
+        n = n2
+    
+    # Helper function to collect all leaf positions
+    def collect_leaves(node_id, path_length):
+        if not suffix_tree[node_id][CHILDREN]:  # This is a leaf
+            # The path length gives us the suffix's starting position
+            suffix_start = len(suffix_tree[0][SUB]) - path_length - 1  # -1 for the $ terminator
+            matches.append(suffix_start)
+        else:
+            for child_id in suffix_tree[node_id][CHILDREN].values():
+                collect_leaves(child_id, path_length + len(suffix_tree[child_id][SUB]))
+    
+    # Start collecting leaves from the current node
+    collect_leaves(n, len(P))
+    
+    return len(matches), sorted(matches)
 def main():
     args = get_args()
 
@@ -81,8 +111,11 @@ def main():
         
     if args.query:
         for query in args.query:
-            match_len = search_tree(tree, query)
-            print(f'{query} : {match_len}')
+            match_count, match_locations = search_tree(tree, query)
+            print(f'{query} : {match_count} exact matches, match locations: {match_locations}')
+    
+    # Keep the print statement from your original code
+    print(T[930:940])
 
 if __name__ == '__main__':
     main()

@@ -20,12 +20,26 @@ def get_args():
     return parser.parse_args()
 
 def build_suffix_trie(s):
-    # YOUR CODE HERE
-    return None
+    root = {}
+    
+    # Insert all suffixes into the trie
+    for i in range(len(s)):
+        current_node = root
+        for char in s[i:]:
+            if char not in current_node:
+                current_node[char] = {}
+            current_node = current_node[char]
+        current_node['$'] = True  # Mark the end of a suffix
+    
+    return root
 
 def search_trie(trie, pattern):
-    # YOUR CODE HERE
-    return None
+    current_node = trie
+    for char in pattern:
+        if char not in current_node:
+            return False
+        current_node = current_node[char]
+    return True
 
 def main():
     args = get_args()
@@ -42,8 +56,8 @@ def main():
 
     if args.query:
         for query in args.query:
-            match_len = search_trie(trie, query)
-            print(f'{query} : {match_len}')
+            match_found = search_trie(trie, query)
+            print(f'{query} : {match_found}')
 
 if __name__ == '__main__':
     main()
